@@ -29,7 +29,7 @@ const initialState = {
       greetingsSrc: "https://ruverse-10001.com/video/greetings_dohyung.webm",
       errorSrc: "https://ruverse-10001.com/video/pardon_dohyung.webm",
       noteSrc: "https://ruverse-10001.com/video/note_dohyung.mp4",
-      existingSrc: "https://ruverse-10001t.com/video/regreetings_dohyung.webm",
+      existingSrc: "https://ruverse-10001.com/video/regreetings_dohyung.webm",
     },
     isNotePlaying: false,
     isGreetingsPlaying: true,
