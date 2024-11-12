@@ -1063,7 +1063,7 @@ const AiConsultChannelPage = () => {
           zIndex={0}
           sx={{
             backgroundImage: `url(${BackgroundImage})`,
-            backgroundSize: "cover",
+            backgroundSize: "contain",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
             display: { xs: "none", md: "block" },
@@ -1084,7 +1084,7 @@ const AiConsultChannelPage = () => {
           muted
           zIndex={1}
           sx={{
-            objectFit: "cover",
+            objectFit: "contain",
           }}
         />
 
@@ -1107,7 +1107,7 @@ const AiConsultChannelPage = () => {
               onPlay={handleVideoPlay}
               zIndex={2}
               sx={{
-                objectFit: "cover",
+                objectFit: "contain",
               }}
             />
           </Fade>

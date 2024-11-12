@@ -335,7 +335,7 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
         videoRef.current = el;
         if (ref) ref.current = el;
       }}
-      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      style={{ width: "100%", height: "100%", objectFit: "contain" }}
       onPlay={(e) => {
         onStart();
         if (onPlay) onPlay(e);
