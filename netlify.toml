@@ -1,0 +1,12 @@
+
+[[redirects]]
+  from = "/proxy/*"
+  to = "https://server.snu/:splat"
+  status = 200
+  force = true
+  headers = { "X-Forwarded-Host" = "main--ruverse.netlify.app" }
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
