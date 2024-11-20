@@ -73,9 +73,9 @@ const AiConsultEntryPageRe = () => {
 
     let unameToUse = unameParam;
     const containsKorean = /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(unameParam);
-    if (containsKorean) {
-      unameToUse = convert(unameParam).replace(/\s+/g, "");
-    }
+    // if (containsKorean) {
+    //   unameToUse = convert(unameParam).replace(/\s+/g, "");
+    // }
 
     console.log(
       "uname: ",
@@ -155,9 +155,9 @@ const AiConsultEntryPageRe = () => {
   const onVideoEnded = () => {
     let unameToUse = unameParam;
     const containsKorean = /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(unameParam);
-    if (containsKorean) {
-      unameToUse = convert(unameParam).replace(/\s+/g, "");
-    }
+    // if (containsKorean) {
+    //   unameToUse = convert(unameParam).replace(/\s+/g, "");
+    // }
     navigate(
       `/ai-consult/${unameToUse}?phoneNumber=${phoneNumberParam}&selectedAvatar=${selectedAvatar}`
     );

@@ -2,6 +2,10 @@ import { ruverseClient } from "@apis/ruverse";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
+  userInfo: {
+    uname: "",
+    phoneNumber: "",
+  },
   audio: {
     sonny: {
       defaultSrc: "https://ruverse-10001.com/video/default_sonny.mp4",
@@ -149,11 +153,20 @@ export const aiConsultSlice = createSlice({
       state.audio.isErrorOccurred = false;
       state.audio.src = "";
     },
+    setUserInfo: (state, action) => {
+      console.log("Current state.userInfo before:", state.userInfo);
+      console.log("Payload uname:", action.payload.uname);
+      console.log("Payload phoneNumber:", action.payload.phoneNumber);
+      state.userInfo.uname = action.payload.uname;
+      state.userInfo.phoneNumber = action.payload.phoneNumber;
+      console.log("Current state.userInfo after:", state.userInfo);
+    },
     resetState: (state) => {
       // Reset all state properties except sessionStatus
       return {
         ...initialState,
         sessionStatus: state.sessionStatus, // Preserve sessionStatus
+        userInfo: state.userInfo, // Preserve userInfo
       };
     },
   },
@@ -212,6 +225,7 @@ export const {
   setAudioErrorOccurred, // 추가된 액션
   clearAudioErrorOccurred, // 추가된 액션
   resetState,
+  setUserInfo,
 } = aiConsultSlice.actions;
 
 export default aiConsultSlice.reducer;

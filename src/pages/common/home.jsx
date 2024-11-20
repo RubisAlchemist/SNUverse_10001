@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Footer, Header } from "@components/index";
 import homeImage from "@assets/images/homeImage.png";
 import styled, { keyframes } from "styled-components";
-import transitionVideo from "@assets/videos/SNUVERSE_home.mp4";
+//import transitionVideo from "@assets/videos/SNUVERSE_home.mp4";
+import transitionVideo from "@assets/videos/SNUVERSE_home2.mp4";
 
 // SweetAlert2 임포트
 import Swal from "sweetalert2";
