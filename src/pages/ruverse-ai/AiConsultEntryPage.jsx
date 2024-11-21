@@ -553,7 +553,7 @@ const AiConsultEntryPage = () => {
     if (!userEntryFound) {
       return {
         success: false,
-        message: "에약하신 상담 시간이 아닙니다.",
+        message: "예약하신 상담 시간이 아닙니다.",
       };
     }
 
