@@ -941,14 +941,21 @@ const AudioRecorder = ({
     //사용자가 예약된 상담 시간에 있는지 확인
     const reservationResult = checkUserReservation(uname, phoneNumber);
     if (!reservationResult.success) {
-      await Swal.fire({
-        title: "안내",
+      MySwal.fire({
+        title: "상담 종료",
         text: reservationResult.message,
         icon: "info",
-        confirmButtonText: "확인",
+        confirmButtonText: "만족도 조사 하러가기",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.open(
+            "https://docs.google.com/forms/d/e/1FAIpQLScdd0osi9M_RWAnjnCEjaku49Cee7jMhkIpZF9VnUBfzQy2ZQ/viewform"
+          );
+        }
+        navigate("/");
+        window.location.reload();
       });
-      navigate("/");
-      window.location.reload();
+      setIsLoading(false); // 로딩 상태 해제
       return;
     }
 
