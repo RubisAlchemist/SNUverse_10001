@@ -452,6 +452,12 @@ import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import scheduleData from "@assets/scheduleData.json";
 
+// SweetAlert2 임포트
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
+
 const useStyles = makeStyles({
   icon: {
     transition: "transform 0.1s",
