@@ -3,7 +3,7 @@
   "routes": [
     {
       "src": "/proxy/(.*)",
-      "dest": "https://ruverse-10001.com//$1"
+      "dest": "https://snuverse-10001.store//$1"
     },
     {
       "src": "/[^.]+",
