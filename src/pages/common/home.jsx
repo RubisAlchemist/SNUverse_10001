@@ -82,9 +82,9 @@ const HomePage = () => {
       <Header />
       <Content>
         <AnimatedText>
-          🌈 마음의 상처를 치유할 시간💡
+          🌈Welcome to SNUverse💡
           <br />
-          여기서 잠시 머물러 쉬어가세요
+          We are here to help you!
         </AnimatedText>
         <ResponsiveImage src={homeImage} alt="Home Image" />
         <ActionButton onClick={onClickNavigate} disabled={isLoading}>
@@ -93,7 +93,7 @@ const HomePage = () => {
           ) : (
             "AI 심리상담소 입장하기"
           )} */}
-          AI 심리상담소 입장하기
+          Enter SNUverse
         </ActionButton>
       </Content>
       <Footer />
