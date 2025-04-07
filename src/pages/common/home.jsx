@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Footer, Header } from "@components/index";
 import homeImage from "@assets/images/homeImage.png";
 import styled, { keyframes } from "styled-components";
-//import transitionVideo from "@assets/videos/SNUVERSE_home.mp4";
-import transitionVideo from "@assets/videos/SNUVERSE_home2.mp4";
+//import transitionVideo from "@assets/videos/BetterMood_home.mp4";
+import transitionVideo from "@assets/videos/BetterMood_home2.mp4";
 
 // SweetAlert2 임포트
 import Swal from "sweetalert2";
@@ -82,7 +82,7 @@ const HomePage = () => {
       <Header />
       <Content>
         <AnimatedText>
-          🌈Welcome to SNUverse💡
+          🌈Welcome to BetterMood💡
           <br />
           We are here to help you!
         </AnimatedText>
@@ -93,7 +93,7 @@ const HomePage = () => {
           ) : (
             "AI 심리상담소 입장하기"
           )} */}
-          Enter SNUverse
+          Enter BetterMood
         </ActionButton>
       </Content>
       <Footer />
