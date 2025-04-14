@@ -405,6 +405,111 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
     }
   };
 
+  // const fetchAndAppendVideo = async (index) => {
+  //   if (isStopped.current) {
+  //     console.log("isStopped.current is true, exiting fetchAndAppendVideo");
+  //     return;
+  //   }
+  //   if (fetchInProgress.current[index]) {
+  //     console.log(`Fetch for index ${index} already in progress, exiting`);
+  //     return;
+  //   }
+  //   fetchInProgress.current[index] = true;
+
+  //   const url = getVideoUrl(index);
+  //   console.log(url);
+  //   const mediaSource = mediaSourceRef.current;
+  //   retryCounts.current[index] = 0;
+
+  //   const MAX_RETRIES_BEFORE_FINAL_CHECK = 3;
+  //   const FETCH_TIMEOUT = 3000;
+
+  //   while (!isStopped.current) {
+  //     try {
+  //       console.log(`Attempting to fetch video ${index}`);
+  //       const timeoutPromise = new Promise((_, reject) =>
+  //         setTimeout(() => reject(new Error("Fetch timeout")), FETCH_TIMEOUT)
+  //       );
+  //       const response = await Promise.race([
+  //         fetch(url, { credentials: "include" }),
+  //         timeoutPromise,
+  //       ]);
+  //       // const response = await fetch(url, {
+  //       //   credentials: "include",
+  //       // });
+  //       if (!response.ok) {
+  //         throw new Error(`Failed to fetch video: ${response.statusText}`);
+  //       }
+  //       // const arrayBuffer = await response.arrayBuffer();
+  //       console.log(
+  //         `Fetch video ${index} successful, status: ${response.status}`
+  //       );
+  //       // const arrayBuffer = await response.arrayBuffer();
+  //       const arrayBufferPromise = response.arrayBuffer();
+  //       const arrayBufferTimeout = new Promise((_, reject) =>
+  //         setTimeout(() => reject(new Error("ArrayBuffer timeout")), 3000)
+  //       );
+  //       const arrayBuffer = await Promise.race([
+  //         arrayBufferPromise,
+  //         arrayBufferTimeout,
+  //       ]);
+  //       console.log(
+  //         `Video ${index} data received, size: ${arrayBuffer.byteLength}`
+  //       );
+
+  //       // Add this check for zero-byte arrayBuffer
+  //       if (arrayBuffer.byteLength === 0) {
+  //         throw new Error("Fetched video segment is empty");
+  //       }
+
+  //       fetchInProgress.current[index] = false;
+  //       retryCounts.current[index] = 0;
+
+  //       // Add to queue
+  //       queuedVideos.current.push(arrayBuffer);
+
+  //       // Append if possible
+  //       if (
+  //         mediaSource &&
+  //         mediaSource.readyState === "open" &&
+  //         sourceBufferRef.current &&
+  //         !sourceBufferRef.current.updating
+  //       ) {
+  //         appendNextVideo();
+  //       }
+
+  //       // Fetching successful, proceed to next index
+  //       currentIndexRef.current = index + 1;
+  //       // Proceed to fetch next segment
+  //       fetchAndAppendVideo(currentIndexRef.current);
+  //       return;
+  //     } catch (error) {
+  //       retryCounts.current[index] += 1;
+  //       console.error(
+  //         `Error fetching video ${index}, retry ${retryCounts.current[index]}:`,
+  //         error
+  //       );
+  //       if (retryCounts.current[index] % MAX_RETRIES_BEFORE_FINAL_CHECK === 0) {
+  //         console.log(
+  //           `Reached ${retryCounts.current[index]} retries for video ${index}. Checking for final video.`
+  //         );
+  //         await checkForFinalVideo();
+  //         if (isStopped.current) {
+  //           fetchInProgress.current[index] = false;
+  //           return;
+  //         }
+  //       }
+  //       await sleep(RETRY_DELAY);
+  //       // Continue loop to retry !
+  //       if (retryCounts.current[index] >= 22 && onError) {
+  //         onError(error);
+  //         return;
+  //       }
+  //     }
+  //   }
+
+  //   fetchInProgress.current[index] = false;
+  // };
   const fetchAndAppendVideo = async (index) => {
     if (isStopped.current) {
       console.log("isStopped.current is true, exiting fetchAndAppendVideo");
@@ -419,10 +524,16 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
     const url = getVideoUrl(index);
     console.log(url);
     const mediaSource = mediaSourceRef.current;
-    retryCounts.current[index] = 0;
+    retryCounts.current[index] = retryCounts.current[index] || 0;
+    const arrayBufferTimeoutCounts = retryCounts.current[index]
+      ? retryCounts.current[index].arrayBufferTimeoutCounts || 0
+      : 0;
 
     const MAX_RETRIES_BEFORE_FINAL_CHECK = 3;
-    const FETCH_TIMEOUT = 3000;
+    const FETCH_TIMEOUT = 3000; // fetch 타임아웃 3초
+    const ARRAY_BUFFER_TIMEOUT = 3000; // arrayBuffer 타임아웃 3초
+    const MAX_ARRAY_BUFFER_RETRIES = 5; // arrayBuffer 타임아웃 최대 재시도 횟수
+    const RETRY_DELAY = 1000; // 일반 오류 시 재시도 지연
 
     while (!isStopped.current) {
       try {
@@ -434,20 +545,20 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
           fetch(url, { credentials: "include" }),
           timeoutPromise,
         ]);
-        // const response = await fetch(url, {
-        //   credentials: "include",
-        // });
         if (!response.ok) {
           throw new Error(`Failed to fetch video: ${response.statusText}`);
         }
-        // const arrayBuffer = await response.arrayBuffer();
         console.log(
           `Fetch video ${index} successful, status: ${response.status}`
         );
-        // const arrayBuffer = await response.arrayBuffer();
+
+        // arrayBuffer에 별도 타임아웃 적용
         const arrayBufferPromise = response.arrayBuffer();
         const arrayBufferTimeout = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("ArrayBuffer timeout")), 3000)
+          setTimeout(
+            () => reject(new Error("ArrayBuffer timeout")),
+            ARRAY_BUFFER_TIMEOUT
+          )
         );
         const arrayBuffer = await Promise.race([
           arrayBufferPromise,
@@ -457,18 +568,20 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
           `Video ${index} data received, size: ${arrayBuffer.byteLength}`
         );
 
-        // Add this check for zero-byte arrayBuffer
         if (arrayBuffer.byteLength === 0) {
           throw new Error("Fetched video segment is empty");
         }
 
         fetchInProgress.current[index] = false;
         retryCounts.current[index] = 0;
+        // arrayBufferTimeoutCounts 초기화
+        retryCounts.current[index] = {
+          ...retryCounts.current[index],
+          arrayBufferTimeoutCounts: 0,
+        };
 
-        // Add to queue
         queuedVideos.current.push(arrayBuffer);
 
-        // Append if possible
         if (
           mediaSource &&
           mediaSource.readyState === "open" &&
@@ -478,20 +591,50 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
           appendNextVideo();
         }
 
-        // Fetching successful, proceed to next index
         currentIndexRef.current = index + 1;
-        // Proceed to fetch next segment
         fetchAndAppendVideo(currentIndexRef.current);
         return;
       } catch (error) {
-        retryCounts.current[index] += 1;
-        console.error(
-          `Error fetching video ${index}, retry ${retryCounts.current[index]}:`,
-          error
-        );
-        if (retryCounts.current[index] % MAX_RETRIES_BEFORE_FINAL_CHECK === 0) {
+        if (error.message === "ArrayBuffer timeout") {
+          retryCounts.current[index] = retryCounts.current[index] || {};
+          retryCounts.current[index].arrayBufferTimeoutCounts =
+            (retryCounts.current[index].arrayBufferTimeoutCounts || 0) + 1;
+          console.warn(
+            `ArrayBuffer timeout for video ${index}, attempt ${retryCounts.current[index].arrayBufferTimeoutCounts}/${MAX_ARRAY_BUFFER_RETRIES}`
+          );
+
+          if (
+            retryCounts.current[index].arrayBufferTimeoutCounts >=
+            MAX_ARRAY_BUFFER_RETRIES
+          ) {
+            console.error(
+              `Max arrayBuffer retries reached for video ${index}. Treating as failure.`
+            );
+            retryCounts.current[index].count =
+              (retryCounts.current[index].count || 0) + 1;
+          } else {
+            console.log(
+              `Retrying video ${index} immediately due to arrayBuffer timeout`
+            );
+            fetchInProgress.current[index] = false; // 즉시 재시도 준비
+            continue; // 지연 없이 동일 인덱스 재시도
+          }
+        } else {
+          retryCounts.current[index] = retryCounts.current[index] || {};
+          retryCounts.current[index].count =
+            (retryCounts.current[index].count || 0) + 1;
+          console.error(
+            `Error fetching video ${index}, retry ${retryCounts.current[index].count}:`,
+            error
+          );
+        }
+
+        if (
+          retryCounts.current[index].count % MAX_RETRIES_BEFORE_FINAL_CHECK ===
+          0
+        ) {
           console.log(
-            `Reached ${retryCounts.current[index]} retries for video ${index}. Checking for final video.`
+            `Reached ${retryCounts.current[index].count} retries for video ${index}. Checking for final video.`
           );
           await checkForFinalVideo();
           if (isStopped.current) {
@@ -499,12 +642,14 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
             return;
           }
         }
-        await sleep(RETRY_DELAY);
-        // Continue loop to retry !
-        if (retryCounts.current[index] >= 22 && onError) {
+
+        if (retryCounts.current[index].count >= 22 && onError) {
           onError(error);
+          fetchInProgress.current[index] = false;
           return;
         }
+
+        await sleep(RETRY_DELAY);
       }
     }
 
