@@ -60,7 +60,7 @@
 //     const mediaSource = mediaSourceRef.current;
 //     retryCounts.current[index] = 0;
 
-//     const MAX_RETRIES_BEFORE_FINAL_CHECK = 5;
+//     const MAX_RETRIES_BEFORE_FINAL_CHECK = 3;
 
 //     while (!isStopped.current) {
 //       try {
@@ -117,7 +117,7 @@
 //         }
 //         await sleep(RETRY_DELAY);
 //         // Continue loop to retry !
-//         if (retryCounts.current[index] >= 5 && onError) {
+//         if (retryCounts.current[index] >= 22 && onError) {
 //           onError(error);
 //           return;
 //         }
@@ -200,10 +200,6 @@
 //     if (!canPlay) {
 //       setCanPlay(true);
 //     }
-//     // 버퍼 추가 후 자동 재개
-//     if (videoRef.current?.paused && !videoRef.current.ended) {
-//       videoRef.current.play().catch(() => {});
-//     }
 //   };
 
 //   const sourceOpen = (e) => {
@@ -258,21 +254,12 @@
 //     mediaSource.addEventListener("sourceopen", handleSourceOpen);
 
 //     // 비디오 이벤트 핸들러 등록
-//     // const handlePause = () => {
-//     //   console.log("SeamlessVideoPlayer: Video paused");
-//     //   if (!video.seeking && !video.ended && !isStopped.current) {
-//     //     handleVideoError(new Error("Video paused unexpectedly"));
-//     //   }
-//     // };
 //     const handlePause = () => {
-//       // ended 도 아니고 seeking 도 아닌데 readyState 가 2 이하이면
-//       // 단순히 버퍼를 기다리는 중일 가능성이 큽니다. 에러 처리 금지!
-//       if (video.readyState >= 3 /* HAVE_FUTURE_DATA */) return;
-
-//       // onPause prop 은 그대로 전달
-//       if (onPause) onPause();
+//       console.log("SeamlessVideoPlayer: Video paused");
+//       if (!video.seeking && !video.ended && !isStopped.current) {
+//         handleVideoError(new Error("Video paused unexpectedly"));
+//       }
 //     };
-
 //     const handleStalled = () => {
 //       console.log("SeamlessVideoPlayer: Video stalled");
 //       handleVideoError(new Error("Video stalled"));
@@ -285,9 +272,6 @@
 //     video.addEventListener("pause", handlePause);
 //     video.addEventListener("stalled", handleStalled);
 //     video.addEventListener("error", handleError);
-//     video.addEventListener("waiting", () =>
-//       console.log("SeamlessVideoPlayer: waiting for data…")
-//     );
 
 //     const handleEnded = () => {
 //       console.log("Playback ended.");
@@ -401,6 +385,11 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
     console.log("seamlessVideoPlayer: ", initialVideoUrl.videoPath);
   }, [initialVideoUrl]);
 
+  const handleWaiting = () => {
+    console.log("SeamlessVideoPlayer: Video waiting for data");
+    // 필요 시 추가 조치 (예: 재시도 로직 강화)
+  };
+
   const getVideoUrl = (index) => {
     if (index === "final") {
       return `${baseUrl.current}_final.webm`;
@@ -426,17 +415,32 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
     retryCounts.current[index] = 0;
 
     const MAX_RETRIES_BEFORE_FINAL_CHECK = 3;
+    const FETCH_TIMEOUT = 3000;
 
     while (!isStopped.current) {
       try {
         console.log(`Attempting to fetch video ${index}`);
-        const response = await fetch(url, {
-          credentials: "include",
-        });
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Fetch timeout")), FETCH_TIMEOUT)
+        );
+        const response = await Promise.race([
+          fetch(url, { credentials: "include" }),
+          timeoutPromise,
+        ]);
+        // const response = await fetch(url, {
+        //   credentials: "include",
+        // });
         if (!response.ok) {
           throw new Error(`Failed to fetch video: ${response.statusText}`);
         }
+        // const arrayBuffer = await response.arrayBuffer();
+        console.log(
+          `Fetch video ${index} successful, status: ${response.status}`
+        );
         const arrayBuffer = await response.arrayBuffer();
+        console.log(
+          `Video ${index} data received, size: ${arrayBuffer.byteLength}`
+        );
 
         // Add this check for zero-byte arrayBuffer
         if (arrayBuffer.byteLength === 0) {
@@ -637,6 +641,7 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
     video.addEventListener("pause", handlePause);
     video.addEventListener("stalled", handleStalled);
     video.addEventListener("error", handleError);
+    video.addEventListener("waiting", handleWaiting);
 
     const handleEnded = () => {
       console.log("Playback ended.");
