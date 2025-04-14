@@ -200,6 +200,10 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
     if (!canPlay) {
       setCanPlay(true);
     }
+    // 버퍼 추가 후 자동 재개
+    if (videoRef.current?.paused && !videoRef.current.ended) {
+      videoRef.current.play().catch(() => {});
+    }
   };
 
   const sourceOpen = (e) => {
@@ -254,12 +258,21 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
     mediaSource.addEventListener("sourceopen", handleSourceOpen);
 
     // 비디오 이벤트 핸들러 등록
+    // const handlePause = () => {
+    //   console.log("SeamlessVideoPlayer: Video paused");
+    //   if (!video.seeking && !video.ended && !isStopped.current) {
+    //     handleVideoError(new Error("Video paused unexpectedly"));
+    //   }
+    // };
     const handlePause = () => {
-      console.log("SeamlessVideoPlayer: Video paused");
-      if (!video.seeking && !video.ended && !isStopped.current) {
-        handleVideoError(new Error("Video paused unexpectedly"));
-      }
+      // ended 도 아니고 seeking 도 아닌데 readyState 가 2 이하이면
+      // 단순히 버퍼를 기다리는 중일 가능성이 큽니다. 에러 처리 금지!
+      if (video.readyState >= 3 /* HAVE_FUTURE_DATA */) return;
+
+      // onPause prop 은 그대로 전달
+      if (onPause) onPause();
     };
+
     const handleStalled = () => {
       console.log("SeamlessVideoPlayer: Video stalled");
       handleVideoError(new Error("Video stalled"));
@@ -272,6 +285,9 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
     video.addEventListener("pause", handlePause);
     video.addEventListener("stalled", handleStalled);
     video.addEventListener("error", handleError);
+    video.addEventListener("waiting", () =>
+      console.log("SeamlessVideoPlayer: waiting for data…")
+    );
 
     const handleEnded = () => {
       console.log("Playback ended.");
