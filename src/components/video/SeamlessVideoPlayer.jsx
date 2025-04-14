@@ -60,7 +60,7 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
     const mediaSource = mediaSourceRef.current;
     retryCounts.current[index] = 0;
 
-    const MAX_RETRIES_BEFORE_FINAL_CHECK = 3;
+    const MAX_RETRIES_BEFORE_FINAL_CHECK = 20;
 
     while (!isStopped.current) {
       try {
