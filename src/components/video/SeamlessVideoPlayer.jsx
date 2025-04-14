@@ -691,6 +691,36 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
     }
   };
 
+  // const appendNextVideo = () => {
+  //   const mediaSource = mediaSourceRef.current;
+  //   if (
+  //     queuedVideos.current.length > 0 &&
+  //     mediaSource &&
+  //     mediaSource.readyState === "open" &&
+  //     sourceBufferRef.current &&
+  //     !sourceBufferRef.current.updating
+  //   ) {
+  //     const nextVideo = queuedVideos.current.shift();
+  //     console.log("Appending video segment, size:", nextVideo.byteLength);
+  //     try {
+  //       sourceBufferRef.current.appendBuffer(nextVideo);
+  //       console.log("Buffer appended successfully.");
+  //     } catch (error) {
+  //       console.error("Error appending buffer:", error);
+  //       // Re-queue the video and retry later
+  //       queuedVideos.current.unshift(nextVideo);
+  //       if (onError) {
+  //         onError(error);
+  //       }
+  //     }
+  //   } else if (isStopped.current && queuedVideos.current.length === 0) {
+  //     // If we've been instructed to stop and the buffer is empty, end the stream
+  //     if (mediaSource && mediaSource.readyState === "open") {
+  //       console.log("Ending stream after all videos have been appended.");
+  //       mediaSource.endOfStream();
+  //     }
+  //   }
+  // };
   const appendNextVideo = () => {
     const mediaSource = mediaSourceRef.current;
     if (
@@ -707,17 +737,18 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
         console.log("Buffer appended successfully.");
       } catch (error) {
         console.error("Error appending buffer:", error);
-        // Re-queue the video and retry later
         queuedVideos.current.unshift(nextVideo);
-        if (onError) {
-          onError(error);
-        }
+        if (onError) onError(error);
       }
     } else if (isStopped.current && queuedVideos.current.length === 0) {
-      // If we've been instructed to stop and the buffer is empty, end the stream
       if (mediaSource && mediaSource.readyState === "open") {
         console.log("Ending stream after all videos have been appended.");
         mediaSource.endOfStream();
+      }
+    } else if (queuedVideos.current.length === 0 && !isStopped.current) {
+      console.log("Queue empty, ensuring fetch for current index");
+      if (!fetchInProgress.current[currentIndexRef.current]) {
+        fetchAndAppendVideo(currentIndexRef.current);
       }
     }
   };
