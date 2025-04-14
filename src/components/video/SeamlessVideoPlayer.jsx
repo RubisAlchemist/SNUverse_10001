@@ -387,7 +387,14 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
 
   const handleWaiting = () => {
     console.log("SeamlessVideoPlayer: Video waiting for data");
-    // 필요 시 추가 조치 (예: 재시도 로직 강화)
+    if (
+      queuedVideos.current.length === 0 &&
+      !fetchInProgress.current[currentIndexRef.current] &&
+      !isStopped.current
+    ) {
+      console.log("No data in queue, triggering fetch for current index");
+      fetchAndAppendVideo(currentIndexRef.current);
+    }
   };
 
   const getVideoUrl = (index) => {
@@ -437,7 +444,15 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
         console.log(
           `Fetch video ${index} successful, status: ${response.status}`
         );
-        const arrayBuffer = await response.arrayBuffer();
+        // const arrayBuffer = await response.arrayBuffer();
+        const arrayBufferPromise = response.arrayBuffer();
+        const arrayBufferTimeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("ArrayBuffer timeout")), 3000)
+        );
+        const arrayBuffer = await Promise.race([
+          arrayBufferPromise,
+          arrayBufferTimeout,
+        ]);
         console.log(
           `Video ${index} data received, size: ${arrayBuffer.byteLength}`
         );
