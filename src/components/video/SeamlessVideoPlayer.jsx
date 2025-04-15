@@ -529,7 +529,7 @@ const SeamlessVideoPlayer = forwardRef((props, ref) => {
       ? retryCounts.current[index].arrayBufferTimeoutCounts || 0
       : 0;
 
-    const MAX_RETRIES_BEFORE_FINAL_CHECK = 3;
+    const MAX_RETRIES_BEFORE_FINAL_CHECK = 5;
     const FETCH_TIMEOUT = 3000; // fetch 타임아웃 3초
     const ARRAY_BUFFER_TIMEOUT = 3000; // arrayBuffer 타임아웃 3초
     const MAX_ARRAY_BUFFER_RETRIES = 5; // arrayBuffer 타임아웃 최대 재시도 횟수
