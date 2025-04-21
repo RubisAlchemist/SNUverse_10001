@@ -82,6 +82,8 @@ export const uploadNewSessionRequest = createAsyncThunk(
     // Payload creator function
     try {
       console.log(formData);
+      const requestTimestamp = new Date().toISOString();
+      console.log("Request Timestamp:", requestTimestamp);
       const response = await ruverseClient.post("/counseling/init", formData, {
         // It's better to let Axios set the Content-Type header for FormData
         // headers: {
@@ -90,6 +92,8 @@ export const uploadNewSessionRequest = createAsyncThunk(
       });
       const data = response.data;
       console.log("response data: ", response);
+      const responseTimestamp = new Date().toISOString();
+      console.log("Response Timestamp:", responseTimestamp);
       return data;
     } catch (error) {
       console.error("Upload failed:", error);
